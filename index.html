@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Print Pricing Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: blue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: darkblue;
+        }
+        .result {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .disclaimer {
+            margin-top: 10px;
+            font-size: 12px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>3D Print Pricing Calculator</h2>
+        <input type="number" id="length" placeholder="Length (cm)">
+        <input type="number" id="width" placeholder="Width (cm)">
+        <input type="number" id="height" placeholder="Height (cm)">
+        <input type="number" id="adjustmentFactor" placeholder="Model Adjustment Factor (1-2)" step="0.1" min="1" max="2">
+        <button onclick="calculatePrice()">Calculate Price</button>
+        <p class="result" id="finalPrice"></p>
+        <p class="disclaimer">* Prices are estimates and may vary based on model adjustments or printing failures.</p>
+    </div>
+
+    <script>
+        function calculatePrice() {
+            let length = parseFloat(document.getElementById("length").value) || 0;
+            let width = parseFloat(document.getElementById("width").value) || 0;
+            let height = parseFloat(document.getElementById("height").value) || 0;
+            let adjustmentFactor = parseFloat(document.getElementById("adjustmentFactor").value) || 1;
+            
+            const costPerUnit = 0.5; // Reasonable cost per cm³
+            const labourCost = 30; // Static labour cost
+            const overhead = 10; // Static overhead cost
+            const profitMargin = 15; // Static profit margin in percentage
+            
+            if (height === 0) {
+                height = 1; // Default to area if height is zero
+            }
+            
+            const volume = length * width * height;
+            const baseCost = volume * costPerUnit * adjustmentFactor; // Adjusted cost
+            const totalCost = baseCost + labourCost + overhead;
+            const finalPrice = totalCost * (1 + profitMargin / 100);
+            
+            document.getElementById("finalPrice").innerText = `Final Price: GHS ${finalPrice.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>
