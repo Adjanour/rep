@@ -4,88 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Print Pricing Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background: blue;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: darkblue;
-        }
-        .result {
-            margin-top: 10px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .disclaimer {
-            margin-top: 10px;
-            font-size: 12px;
-            color: red;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h2>3D Print Pricing Calculator</h2>
-        <input type="number" id="length" placeholder="Length (cm)">
-        <input type="number" id="width" placeholder="Width (cm)">
-        <input type="number" id="height" placeholder="Height (cm)">
-        <input type="number" id="adjustmentFactor" placeholder="Model Adjustment Factor (1-2)" step="0.1" min="1" max="2">
-        <button onclick="calculatePrice()">Calculate Price</button>
-        <p class="result" id="finalPrice"></p>
-        <p class="disclaimer">* Prices are estimates and may vary based on model adjustments or printing failures.</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">3D Print Pricing Calculator</h2>
+        <div class="space-y-4">
+            <input type="number" id="length" placeholder="Length (cm)" min="0.1" step="0.1" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                   autofocus>
+            <input type="number" id="width" placeholder="Width (cm)" min="0.1" step="0.1" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <input type="number" id="height" placeholder="Height (cm)" min="0" step="0.1" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <select id="materialType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="1">PLA (Standard)</option>
+                <option value="1.2">ABS</option>
+                <option value="1.5">Resin</option>
+            </select>
+            <button onclick="calculatePrice()" 
+                    class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold">
+                Calculate Price
+            </button>
+        </div>
+        <div id="result" class="mt-4 p-4 bg-gray-50 rounded-lg text-gray-800"></div>
+        <p class="mt-2 text-sm text-red-600 text-center">* Prices are estimates and may vary based on model complexity.</p>
     </div>
 
     <script>
         function calculatePrice() {
-            let length = parseFloat(document.getElementById("length").value) || 0;
-            let width = parseFloat(document.getElementById("width").value) || 0;
+            const resultDiv = document.getElementById("result");
+            const length = parseFloat(document.getElementById("length").value) || 0;
+            const width = parseFloat(document.getElementById("width").value) || 0;
             let height = parseFloat(document.getElementById("height").value) || 0;
-            let adjustmentFactor = parseFloat(document.getElementById("adjustmentFactor").value) || 1;
-            
-            const costPerUnit = 0.5; // Reasonable cost per cm³
-            const labourCost = 30; // Static labour cost
-            const overhead = 10; // Static overhead cost
-            const profitMargin = 15; // Static profit margin in percentage
-            
+            const adjustmentFactor = parseFloat(document.getElementById("materialType").value) || 1;
+
+            // Input validation
+            if (length <= 0 || width <= 0) {
+                resultDiv.innerHTML = `<p class="text-red-600 font-semibold">Please enter valid length and width (greater than 0).</p>`;
+                return;
+            }
             if (height === 0) {
                 height = 1; // Default to area if height is zero
             }
-            
+
+            const costPerUnit = 0.4; // Cost per cm³
+            const labourCost = 15; // Flat labour cost
+            const overhead = 10; // Overhead cost
+            const profitMargin = 10; // Hidden profit margin
+
             const volume = length * width * height;
-            const baseCost = volume * costPerUnit * adjustmentFactor; // Adjusted cost
-            const totalCost = baseCost + labourCost + overhead;
-            const finalPrice = totalCost * (1 + profitMargin / 100);
             
-            document.getElementById("finalPrice").innerText = `Final Price: GHS ${finalPrice.toFixed(2)}`;
+            // Volume discount for large prints
+            let effectiveCostPerUnit = costPerUnit;
+            if (volume > 1000) {
+                effectiveCostPerUnit *= 0.9; // 10% discount
+            }
+
+            const materialCost = volume * effectiveCostPerUnit * adjustmentFactor;
+            const totalCost = materialCost + labourCost + overhead;
+            const finalPrice = totalCost * (1 + profitMargin / 100);
+
+            // Display final price and simplified breakdown
+            resultDiv.innerHTML = `
+                <p class="text-lg font-semibold">Final Price: GHS ${finalPrice.toFixed(2)}</p>
+                <p class="text-sm mt-2">Breakdown:</p>
+                <ul class="text-sm list-disc list-inside">
+                    <li>Material: GHS ${materialCost.toFixed(2)}</li>
+                    <li>Labour: GHS ${labourCost.toFixed(2)}</li>
+                    <li>Overhead: GHS ${overhead.toFixed(2)}</li>
+                </ul>
+            `;
         }
     </script>
 </body>
