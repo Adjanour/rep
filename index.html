@@ -17,10 +17,12 @@
                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <input type="number" id="height" placeholder="Height (cm)" min="0" step="0.1" 
                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+	    <input type="number" id="thickness" placeholder="thickness (cm)" min="0" step="0.1" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <select id="materialType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="1">PLA (Standard)</option>
                 <option value="1.2">ABS</option>
-                <option value="1.5">Resin</option>
+                <option value="1.4">Resin</option>
             </select>
             <button onclick="calculatePrice()" 
                     class="w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold">
@@ -37,10 +39,11 @@
             const length = parseFloat(document.getElementById("length").value) || 0;
             const width = parseFloat(document.getElementById("width").value) || 0;
             let height = parseFloat(document.getElementById("height").value) || 0;
+	    const thickness = parseFloat(document.getElementById("thickness").value) || 0.1;
             const adjustmentFactor = parseFloat(document.getElementById("materialType").value) || 1;
 
             // Input validation
-            if (length <= 0 || width <= 0) {
+            if (length <= 0 || width <= 0 || thickness <=0) {
                 resultDiv.innerHTML = `<p class="text-red-600 font-semibold">Please enter valid length and width (greater than 0).</p>`;
                 return;
             }
@@ -50,8 +53,9 @@
 
             const costPerUnit = 0.4; // Cost per cm³
             const labourCost = 15; // Flat labour cost
-            const overhead = 10; // Overhead cost
+            const overhead = 7; // Overhead cost
             const profitMargin = 10; // Hidden profit margin
+	        const thicknessFactor = 12;
 
             const volume = length * width * height;
             
@@ -63,7 +67,8 @@
 
             const materialCost = volume * effectiveCostPerUnit * adjustmentFactor;
             const totalCost = materialCost + labourCost + overhead;
-            const finalPrice = totalCost * (1 + profitMargin / 100);
+	        const penUltimatePrice = totalCost * (1 + profitMargin / 100);
+            const finalPrice = thickness > 0.4 ? penUltimatePrice * (1 + 12 /100) : penUltimatePrice;
 
             // Display final price and simplified breakdown
             resultDiv.innerHTML = `
